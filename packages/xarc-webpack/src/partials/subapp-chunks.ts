@@ -30,7 +30,7 @@ function makeConfig(options) {
     return config;
   }
 
-  let runtimeChunk = "single";
+  let runtimeChunk = undefined; // "single" was causing errors
 
   if (webpack.v1RemoteSubApps) {
     let exposeRemote = 0;
