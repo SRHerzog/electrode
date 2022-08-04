@@ -26,6 +26,10 @@ function makeConfig(options) {
 
   const config: any = {};
 
+  if (webpack.moduleFederation) {
+      config.plugins = [new ModuleFederationPlugin(webpack.moduleFederation)];
+  }
+
   if (!AppMode.hasSubApps) {
     return config;
   }
@@ -35,10 +39,6 @@ function makeConfig(options) {
   if (webpack.v1RemoteSubApps) {
     let exposeRemote = 0;
     const cdnMapping = _.get(webpack, "cdn.enable", false) && _.get(webpack, "cdn.mapping", false);
-
-    if (webpack.moduleFederation) {
-        config.plugins = [new ModuleFederationPlugin(webpack.moduleFederation)];
-    }
     const modFedPlugins = [].concat(webpack.v1RemoteSubApps).map(remote => {
       const missing = [];
       const subAppsToExpose = []
