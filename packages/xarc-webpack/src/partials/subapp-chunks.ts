@@ -26,33 +26,34 @@ function makeConfig(options) {
 
   const config: any = {};
 
-  if (!AppMode.hasSubApps) {
-    return config;
-  }
+  // if (!AppMode.hasSubApps) {
+  //   return config;
+  // }
 
-  let runtimeChunk = "single";
+  let runtimeChunk = undefined; // "single";
 
   if (webpack.v1RemoteSubApps) {
     let exposeRemote = 0;
     const cdnMapping = _.get(webpack, "cdn.enable", false) && _.get(webpack, "cdn.mapping", false);
     const modFedPlugins = [].concat(webpack.v1RemoteSubApps).map(remote => {
-      const missing = [];
-      const subAppsToExpose = []
-        .concat(remote.subAppsToExpose)
-        .filter(x => x)
-        .reduce((exp, x) => {
-          if (!AppMode.subApps[x]) {
-            missing.push(x);
-          } else {
-            const subapp = AppMode.subApps[x];
-            exp[`./${subapp.name}`] = `./${subapp.subAppDir}/${subapp.entry}`;
-          }
-          return exp;
-        }, {});
-      if (missing.length > 0) {
-        throw new Error(`v1RemoteSubApps exposed subapp not found: ${missing.join(", ")}`);
-      }
-      const exposes = { ...remote.exposes, ...subAppsToExpose };
+      // const missing = [];
+      // const subAppsToExpose = []
+      //   .concat(remote.subAppsToExpose)
+      //   .filter(x => x)
+      //   .reduce((exp, x) => {
+      //     if (!AppMode.subApps[x]) {
+      //       missing.push(x);
+      //     } else {
+      //       const subapp = AppMode.subApps[x];
+      //       exp[`./${subapp.name}`] = `./${subapp.subAppDir}/${subapp.entry}`;
+      //     }
+      //     return exp;
+      //   }, {});
+      // if (missing.length > 0) {
+      //   throw new Error(`v1RemoteSubApps exposed subapp not found: ${missing.join(", ")}`);
+      // }
+      const exposes = { remote.exposes };
+      // const exposes = { ...remote.exposes, ...subAppsToExpose };
       const eager = _.isEmpty(exposes);
       if (!eager) {
         exposeRemote++;
@@ -88,53 +89,55 @@ function makeConfig(options) {
     }
   }
 
-  if (webpack.minimizeSubappChunks) {
-    config.optimization = {
-      runtimeChunk,
-      splitChunks: {
-        cacheGroups: {
-          common: {
-            chunks: "all",
-            minChunks: 10,
-            enforce: true,
-            name: "common"
-          }
-        }
-      }
-    };
-  } else {
-    // use webpack splitChunks optimization to automatically put modules
-    // shared by subapps into common bundles.
-    // The common bundles will be determined by the splitChunks parameters.
-    // The filename has the pattern of hex-sum.bundle1~bundle2~bundle#.js
-    // https://webpack.js.org/plugins/split-chunks-plugin/
-    config.optimization = {
-      runtimeChunk,
-      splitChunks: {
-        chunks: "all",
-        minSize: 30 * 1024,
-        maxSize: 250 * 1024,
-        minChunks: 2,
-        maxAsyncRequests: 500,
-        maxInitialRequests: 500,
-        automaticNameDelimiter: "~",
-        // automaticNameMaxLength: 250,
-        cacheGroups: {
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            // https://webpack.js.org/plugins/split-chunks-plugin/#splitchunksname
-            name: hashChunks,
-            priority: -10,
-            reuseExistingChunk: true
-          },
-          shared: {
-            name: hashChunks,
-            priority: -20,
-            reuseExistingChunk: true
-          }
-        }
-      }
-    };
+  // Commented out a bunch of code just to make it work
+
+  // if (webpack.minimizeSubappChunks) {
+  //   config.optimization = {
+  //     runtimeChunk,
+  //     splitChunks: {
+  //       cacheGroups: {
+  //         common: {
+  //           chunks: "all",
+  //           minChunks: 10,
+  //           enforce: true,
+  //           name: "common"
+  //         }
+  //       }
+  //     }
+  //   };
+  // } else {
+  //   // use webpack splitChunks optimization to automatically put modules
+  //   // shared by subapps into common bundles.
+  //   // The common bundles will be determined by the splitChunks parameters.
+  //   // The filename has the pattern of hex-sum.bundle1~bundle2~bundle#.js
+  //   // https://webpack.js.org/plugins/split-chunks-plugin/
+  //   config.optimization = {
+  //     runtimeChunk,
+  //     splitChunks: {
+  //       chunks: "all",
+  //       minSize: 30 * 1024,
+  //       maxSize: 250 * 1024,
+  //       minChunks: 2,
+  //       maxAsyncRequests: 500,
+  //       maxInitialRequests: 500,
+  //       automaticNameDelimiter: "~",
+  //       // automaticNameMaxLength: 250,
+  //       cacheGroups: {
+  //         vendors: {
+  //           test: /[\\/]node_modules[\\/]/,
+  //           // https://webpack.js.org/plugins/split-chunks-plugin/#splitchunksname
+  //           name: hashChunks,
+  //           priority: -10,
+  //           reuseExistingChunk: true
+  //         },
+  //         shared: {
+  //           name: hashChunks,
+  //           priority: -20,
+  //           reuseExistingChunk: true
+  //         }
+  //       }
+  //     }
+  //   };
   }
 
   return config;
